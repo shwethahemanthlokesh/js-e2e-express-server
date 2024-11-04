@@ -20,6 +20,7 @@ steps:
       npm install
       npm run build
       npm test
+      npm install pm2 -g
     displayName: 'Build and Test Application'
 
   # Step 3: Publish test results
