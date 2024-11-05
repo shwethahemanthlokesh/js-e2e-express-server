@@ -38,24 +38,8 @@ steps:
       Contents: '**'
       TargetFolder: '$(System.DefaultWorkingDirectory)/pipeline-artifacts/'
 
-  - task: ArchiveFiles@2
-    inputs:
-      rootFolderOrFile: '$(Build.BinariesDirectory)'
-      includeRootFolder: true
-      archiveType: 'tar'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      replaceExistingArchive: true
-
   # Step 5: Archive the pipeline artifacts folder into a .tar.gz file
  # - script: |
   #    cd $(System.DefaultWorkingDirectory)
    #   tar -czvf $(tarFile) -C pipeline-artifacts .
     #displayName: 'Archive pipeline artifacts to tar.gz'
-
-  # Step 6: Publish the .tar.gz file as a build artifact
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish pipeline artifacts .tar.gz'
-    inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)/pipeline-artifacts/'
-      ArtifactName: 'pipeline-artifacts'
-      publishLocation: 'Container'
