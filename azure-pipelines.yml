@@ -1,0 +1,58 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  pipelineArtifactsDir: '$(System.DefaultWorkingDirectory)/pipeline-artifacts'
+  tarFile: 'pipeline-artifacts.tar.gz'
+
+steps:
+  # Step 1: Install Node.js
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '16.x'
+    displayName: 'Install Node.js'
+
+  # Step 2: Install dependencies, build, and test
+  - script: |
+      npm install
+      npm run build
+      npm test
+      npm install pm2 -g
+    displayName: 'Build and Test Application'
+
+  # Step 3: Publish test results
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TEST-*.xml'
+    displayName: 'Publish Test Results'
+
+  # Step 4: Copy files to pipeline artifacts folder
+  - task: CopyFiles@2
+    displayName: 'Copy Files to pipeline artifacts folder'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: '**'
+      TargetFolder: '$(System.DefaultWorkingDirectory)/pipeline-artifacts/'
+  - task: CopyFiles@2
+    displayName: 'Copy Files to pipeline artifacts folder'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: '**'
+      TargetFolder: '$(pipelineArtifactsDir)'
+
+  # Step 5: Archive the pipeline artifacts folder into a .tar.gz file
+  - script: |
+      cd $(System.DefaultWorkingDirectory)
+      tar -czvf $(tarFile) -C pipeline-artifacts .
+    displayName: 'Archive pipeline artifacts to tar.gz'
+    # Step 6: Publish the .tar.gz file as a build artifact
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish pipeline artifacts .tar.gz'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/$(tarFile)'
+      ArtifactName: 'pipeline-artifacts'
+      publishLocation: 'Container'
