@@ -37,9 +37,22 @@ steps:
       SourceFolder: '$(Build.SourcesDirectory)'
       Contents: '**'
       TargetFolder: '$(System.DefaultWorkingDirectory)/pipeline-artifacts/'
+  - task: CopyFiles@2
+    displayName: 'Copy Files to pipeline artifacts folder'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: '**'
+      TargetFolder: '$(pipelineArtifactsDir)'
 
   # Step 5: Archive the pipeline artifacts folder into a .tar.gz file
- # - script: |
-  #    cd $(System.DefaultWorkingDirectory)
-   #   tar -czvf $(tarFile) -C pipeline-artifacts .
-    #displayName: 'Archive pipeline artifacts to tar.gz'
+  - script: |
+      cd $(System.DefaultWorkingDirectory)
+      tar -czvf $(tarFile) -C pipeline-artifacts .
+    displayName: 'Archive pipeline artifacts to tar.gz'
+    # Step 6: Publish the .tar.gz file as a build artifact
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish pipeline artifacts .tar.gz'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/$(tarFile)'
+      ArtifactName: 'pipeline-artifacts'
+      publishLocation: 'Container'
